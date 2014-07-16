@@ -1,0 +1,67 @@
+*** Settings ***
+Documentation     Tests creation of Projects and Datasets
+...               and enabled status of create P/D/S options
+...
+...               This test requires P/D/I in hierarchy.
+
+Resource          ../config.txt
+Resource          ../../resources/web/login.txt
+Resource          ../../resources/web/tree.txt
+Resource          ../../resources/web/thumbs.txt
+
+
+*** Test Cases ***
+
+Test Default Search Check
+    [Documentation]     login,search and Check that you are taken to the search ‘page’/UI with your search query entered into the search field.
+    
+    User "${USERNAME}" logs in with password "${PASSWORD}"
+    Input Text  id=id_search_query  ${SEARCH_QUERY}
+    Submit Form
+    Location Should Be  ${SEARCH URL}
+    Page Should Contain Textfield  name=query
+    Textfield Value Should be  name=query   ${SEARCH_QUERY}
+
+    
+Test Default Search Selections
+	[Documentation]		Check that the objects searched for are Projects, Datasets, Images, Screens, Plates (all checkboxes selected by default).
+
+    Checkbox Should Be Selected  image
+    Checkbox Should Be Selected  dataset
+    Checkbox Should Be Selected  project
+    Checkbox Should Be Selected  plate
+    Checkbox Should Be Selected  screen
+    Checkbox Should Not Be Selected  name
+    Checkbox Should Not Be Selected  description
+    Checkbox Should Not Be Selected  annotation
+    Click Button  id=search_button
+    
+Test Additional Search With Selections
+	[Documentation]		Checkbox selections for name description and annotation and search again
+
+    Select Checkbox  name    
+    Select Checkbox  description    
+    Select Checkbox  annotation
+    Click Button  id=search_button
+    
+Test Check Search Date Field
+	[Documentation]     Check that no date range has been chosen by default.
+    
+    Page Should Contain Textfield  id=startdateinput
+    Textfield Value Should be  id=startdateinput  ${EMPTY}
+    Page Should Contain Textfield  id=enddateinput
+    Textfield Value Should be  id=enddateinput  ${EMPTY}
+
+Test Check Search Default Group Selection
+	[Documentation]		Check that the default Scope for the search is All Groups
+
+    @{In group}  Get List Items  id=searchGroup
+    ${expected_group}  Get Selected List Label  id=searchGroup
+    Should Be Equal  ${expected_group}  ${Default_Srch_Group}
+
+Test Check Search Default User Selection
+	[Documentation]		Check : user matching the username you are logged in as, e.g user-4 user-4.
+
+    @{DataOwned by}  Get List Items  id=searchByGroupMember--1
+    ${expected_user}  Get Selected List Label  id=searchByGroupMember--1
+    Should Be Equal  ${expected_user}  ${FULL NAME} 
