@@ -16,11 +16,28 @@ Test Default Search Check
     [Documentation]     login,search and Check that you are taken to the search ‘page’/UI with your search query entered into the search field.
     
     User "${USERNAME}" logs in with password "${PASSWORD}"
-    Input Text  id=id_search_query  ${SEARCH_QUERY}
-    Submit Form
+    Omero Default Search
     Location Should Be  ${SEARCH URL}
     Page Should Contain Textfield  name=query
     Textfield Value Should be  name=query   ${SEARCH_QUERY}
+    Wait Until Page Contains Element  id=dataTable  1000
+
+Test Check Search Results
+    [Documentation]     Check if results are displayed on the centre pane
+
+    Page Should Contain Element  id=dataTable
+    Page Should Contain             Import Date
+    Page Should Contain             plate1
+    Page Should Not Contain         Plate1231233423454w5
+    Page Should Contain Element     id=center_panel
+    Table Header Should Contain     xpath=//table[@id='dataTable']  Object
+    Table Header Should Contain     xpath=//table[@id='dataTable']  Name
+    Table Header Should Contain     xpath=//table[@id='dataTable']  Import Date
+    Table Header Should Contain     xpath=//table[@id='dataTable']  Group
+    Table Header Should Contain     xpath=//table[@id='dataTable']  Link
+    Page Should Contain Element     xpath=//table[@id='dataTable']//img[@alt='plate']
+    Page Should Contain Element     xpath=//table[@id='dataTable']//img[@alt='dataset']
+    Page Should Contain Element     xpath=//table[@id='dataTable']//img[@alt='project']
 
     
 Test Default Search Selections
@@ -65,3 +82,39 @@ Test Check Search Default User Selection
     @{DataOwned by}  Get List Items  id=searchByGroupMember--1
     ${expected_user}  Get Selected List Label  id=searchByGroupMember--1
     Should Be Equal  ${expected_user}  ${FULL NAME} 
+
+Test Object Types and Fields
+
+    # Select Image Alone
+    Unselect All Checkboxes
+    Select Checkbox  image
+    Click Button  id=search_button
+    Set Selenium Implicit Wait          2
+    Page Should Contain Element         xpath=//table[@id='dataTable']//img[@alt='image']
+    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='dataset']
+    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='project']
+    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='plate']
+
+    # Select Dataset Alone
+    Unselect All Checkboxes
+    Select Checkbox  dataset
+    Click Button  id=search_button
+    Set Selenium Implicit Wait          2
+    Page Should Contain Element         xpath=//table[@id='dataTable']//img[@alt='dataset']
+    Page Should Not Contain Element         xpath=//table[@id='dataTable']//img[@alt='image']
+    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='project']
+    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='plate']
+
+    # Select Project Alone
+    Unselect All Checkboxes
+    Select Checkbox  project
+    Click Button  id=search_button
+    Set Selenium Implicit Wait          2
+    Page Should Contain Element         xpath=//table[@id='dataTable']//img[@alt='project']
+    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='dataset']
+    Page Should Not Contain Element         xpath=//table[@id='dataTable']//img[@alt='image']
+    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='plate']
+
+
+
+

@@ -7,12 +7,12 @@ ${OMERO PORT}           4064
 ${ROOT USERNAME}        root
 ${ROOT PASSWORD}        omero
 
-${USERNAME}             root
-${PASSWORD}             omero
-${FULL NAME}            root root
+${USERNAME}             user-1
+${PASSWORD}             ome
+${FULL NAME}            user-1 user-1
 
 # Web config
-${WEB HOST}             localhost
+${WEB HOST}             octopus.openmicroscopy.org/merge
 ${WEB PORT}             8080
 ${SERVER_ID}            1
 
@@ -21,6 +21,7 @@ ${DELAY}                0
 
 ${LOGIN URL}            http://${WEB HOST}/webclient/login/
 ${WELCOME URL}          http://${WEB HOST}/webclient/
+${SEARCH URL}			http://${WEB HOST}/webclient/search/
 
 ${WEBADMIN WELCOME URL}     http://${WEB HOST}/webadmin/
 ${WEBADMIN LOGIN URL}       ${LOGIN URL}?url=%2Fwebadmin%2F
@@ -29,3 +30,6 @@ ${USERS URL}            ${WEBADMIN WELCOME URL}experimenters/
 ${GROUPS URL}           ${WEBADMIN WELCOME URL}groups/
 
 ${COMMAND}       		bin/omero
+${Search_Query}			test
+${Default_Srch_Group}	All Groups
+${Table_Header}			Name

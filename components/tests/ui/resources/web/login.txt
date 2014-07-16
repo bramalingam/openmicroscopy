@@ -45,3 +45,20 @@ Submit Credentials
 Welcome Page Should Be Open
     Location Should Be    ${WELCOME URL}
     Title Should Be       Webclient
+
+Unselect All Checkboxes
+    
+    Unselect Checkbox  name
+    Unselect Checkbox  description
+    Unselect Checkbox  annotation
+    Unselect Checkbox  image
+    Unselect Checkbox  dataset
+    Unselect Checkbox  project
+    Unselect Checkbox  plate
+    Unselect Checkbox  screen
+
+Omero Default Search
+
+    Input Text  id=id_search_query  ${SEARCH_QUERY}
+    Submit Form
+
