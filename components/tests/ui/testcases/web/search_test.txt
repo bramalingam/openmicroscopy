@@ -8,7 +8,44 @@ Resource          ../config.txt
 Resource          ../../resources/web/login.txt
 Resource          ../../resources/web/tree.txt
 Resource          ../../resources/web/thumbs.txt
+Library           DateTime
 
+*** Variables ***
+
+${XpathImage}           xpath=//table[@id='dataTable']//img[@alt='image']
+${XpathDataset}         xpath=//table[@id='dataTable']//img[@alt='dataset']
+${XpathProject}         xpath=//table[@id='dataTable']//img[@alt='project'] 
+${XpathPlate}           xpath=//table[@id='dataTable']//img[@alt='plate']
+${XpathTable}           xpath=//table[@id='dataTable']
+${XpathTableColumn}     xpath=//table[@id='dataTable']//tr/td[position()=3]
+${Search_Query}         test
+${Default_Srch_Group}   All Groups
+${Table_Header}         Name
+${ImplicitDELAY}        2
+                        
+*** Keywords ***
+
+Unselect All Checkboxes
+    
+    Unselect Checkbox  name
+    Unselect Checkbox  description
+    Unselect Checkbox  annotation
+    Unselect Checkbox  image
+    Unselect Checkbox  dataset
+    Unselect Checkbox  project
+    Unselect Checkbox  plate
+    Unselect Checkbox  screen
+
+Omero Default Search
+    
+    Input Text  id=id_search_query  ${SEARCH_QUERY}
+    Submit Form
+
+For-Loop-In-Range
+    : FOR    ${INDEX}    IN RANGE    2    6
+    \    Log    ${INDEX}
+    \    ${RANDOM_STRING}   Get Table Cell    ${XpathTable}    ${INDEX}    4
+    \    Log    ${RANDOM_STRING}
 
 *** Test Cases ***
 
@@ -22,99 +59,132 @@ Test Default Search Check
     Textfield Value Should be  name=query   ${SEARCH_QUERY}
     Wait Until Page Contains Element  id=dataTable  1000
 
-Test Check Search Results
-    [Documentation]     Check if results are displayed on the centre pane
+# Test Check Search Results
+#     [Documentation]     Check if results are displayed on the centre pane
 
-    Page Should Contain Element  id=dataTable
-    Page Should Contain             Import Date
-    Page Should Contain             plate1
-    Page Should Not Contain         Plate1231233423454w5
-    Page Should Contain Element     id=center_panel
-    Table Header Should Contain     xpath=//table[@id='dataTable']  Object
-    Table Header Should Contain     xpath=//table[@id='dataTable']  Name
-    Table Header Should Contain     xpath=//table[@id='dataTable']  Import Date
-    Table Header Should Contain     xpath=//table[@id='dataTable']  Group
-    Table Header Should Contain     xpath=//table[@id='dataTable']  Link
-    Page Should Contain Element     xpath=//table[@id='dataTable']//img[@alt='plate']
-    Page Should Contain Element     xpath=//table[@id='dataTable']//img[@alt='dataset']
-    Page Should Contain Element     xpath=//table[@id='dataTable']//img[@alt='project']
+#     Page Should Contain Element     id=dataTable
+#     Page Should Contain             Imported
+#     Page Should Contain             plate1
+#     Page Should Not Contain         Plate1231233423454w5
+#     Page Should Contain Element     id=center_panel
+#     Table Header Should Contain     ${XpathTable}  Type
+#     Table Header Should Contain     ${XpathTable}  Name
+#     Table Header Should Contain     ${XpathTable}  Imported
+#     Table Header Should Contain     ${XpathTable}  Group
+#     Table Header Should Contain     ${XpathTable}  Link
+#     Table Header Should Contain     ${XpathTable}  Acquired
+#     Page Should Contain Element     ${XpathPlate}
+#     Page Should Contain Element     ${XpathDataset}
+#     Page Should Contain Element     ${XpathProject}
+#     Page Should Contain Element     ${XpathImage}
 
     
-Test Default Search Selections
-	[Documentation]		Check that the objects searched for are Projects, Datasets, Images, Screens, Plates (all checkboxes selected by default).
+# Test Default Search Selections
+# 	[Documentation]		Check that the objects searched for are Projects, Datasets, Images, Screens, Plates (all checkboxes selected by default).
 
-    Checkbox Should Be Selected  image
-    Checkbox Should Be Selected  dataset
-    Checkbox Should Be Selected  project
-    Checkbox Should Be Selected  plate
-    Checkbox Should Be Selected  screen
-    Checkbox Should Not Be Selected  name
-    Checkbox Should Not Be Selected  description
-    Checkbox Should Not Be Selected  annotation
-    Click Button  id=search_button
+#     Checkbox Should Be Selected  image
+#     Checkbox Should Be Selected  dataset
+#     Checkbox Should Be Selected  project
+#     Checkbox Should Be Selected  plate
+#     Checkbox Should Be Selected  screen
+#     Checkbox Should Not Be Selected  name
+#     Checkbox Should Not Be Selected  description
+#     Checkbox Should Not Be Selected  annotation
+#     Click Button  id=search_button
     
-Test Additional Search With Selections
-	[Documentation]		Checkbox selections for name description and annotation and search again
+# Test Additional Search With Selections
+# 	[Documentation]		Checkbox selections for name description and annotation and search again
 
-    Select Checkbox  name    
-    Select Checkbox  description    
-    Select Checkbox  annotation
-    Click Button  id=search_button
+#     Select Checkbox  name    
+#     Select Checkbox  description    
+#     Select Checkbox  annotation
+#     Click Button  id=search_button
     
-Test Check Search Date Field
-	[Documentation]     Check that no date range has been chosen by default.
+# Test Check Search Date Field
+# 	[Documentation]     Check that no date range has been chosen by default.
     
-    Page Should Contain Textfield  id=startdateinput
+#     Page Should Contain Textfield  id=startdateinput
+#     Textfield Value Should be  id=startdateinput  ${EMPTY}
+#     Page Should Contain Textfield  id=enddateinput
+#     Textfield Value Should be  id=enddateinput  ${EMPTY}
+
+# Test Check Search Default Group Selection
+# 	[Documentation]		Check that the default Scope for the search is All Groups
+
+#     @{In group}  Get List Items  id=searchGroup
+#     ${expected_group}  Get Selected List Label  id=searchGroup
+#     Should Be Equal  ${expected_group}  ${Default_Srch_Group}
+
+# Test Check Search Default User Selection
+# 	[Documentation]		Check : user matching the username you are logged in as, e.g user-4 user-4.
+
+#     @{DataOwned by}  Get List Items  id=searchByGroupMember--1
+#     ${expected_user}  Get Selected List Label  id=searchByGroupMember--1
+#     Should Be Equal  ${expected_user}  ${FULL NAME} 
+
+# Test Object Types and Fields
+
+#     # Select Image Alone
+#     Unselect All Checkboxes
+#     Select Checkbox  image
+#     Click Button  id=search_button
+#     Set Selenium Implicit Wait          ${ImplicitDELAY}
+#     Page Should Contain Element         ${XpathImage}
+#     Page Should Not Contain Element     ${XpathDataset}
+#     Page Should Not Contain Element     ${XpathProject}
+#     Page Should Not Contain Element     ${XpathPlate}
+
+#     # Select Dataset Alone
+#     Unselect All Checkboxes
+#     Select Checkbox  dataset
+#     Click Button  id=search_button
+#     Set Selenium Implicit Wait          ${ImplicitDELAY}
+#     Page Should Contain Element         ${XpathDataset}
+#     Page Should Not Contain Element     ${XpathImage}
+#     Page Should Not Contain Element     ${XpathProject}
+#     Page Should Not Contain Element     ${XpathPlate}
+
+#     # Select Project Alone
+#     Unselect All Checkboxes
+#     Select Checkbox  project
+#     Click Button  id=search_button
+#     Set Selenium Implicit Wait          ${ImplicitDELAY}
+#     Page Should Contain Element         ${XpathProject}
+#     Page Should Not Contain Element     ${XpathDataset}
+#     Page Should Not Contain Element     ${XpathImage}
+#     Page Should Not Contain Element     ${XpathPlate}
+
+Test Date Range
+    
+    Input Text  name=query  .tiff
     Textfield Value Should be  id=startdateinput  ${EMPTY}
-    Page Should Contain Textfield  id=enddateinput
-    Textfield Value Should be  id=enddateinput  ${EMPTY}
-
-Test Check Search Default Group Selection
-	[Documentation]		Check that the default Scope for the search is All Groups
-
-    @{In group}  Get List Items  id=searchGroup
-    ${expected_group}  Get Selected List Label  id=searchGroup
-    Should Be Equal  ${expected_group}  ${Default_Srch_Group}
-
-Test Check Search Default User Selection
-	[Documentation]		Check : user matching the username you are logged in as, e.g user-4 user-4.
-
-    @{DataOwned by}  Get List Items  id=searchByGroupMember--1
-    ${expected_user}  Get Selected List Label  id=searchByGroupMember--1
-    Should Be Equal  ${expected_user}  ${FULL NAME} 
-
-Test Object Types and Fields
-
-    # Select Image Alone
-    Unselect All Checkboxes
-    Select Checkbox  image
+    Input Text  id=startdateinput  2014-07-15
     Click Button  id=search_button
-    Set Selenium Implicit Wait          2
-    Page Should Contain Element         xpath=//table[@id='dataTable']//img[@alt='image']
-    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='dataset']
-    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='project']
-    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='plate']
 
-    # Select Dataset Alone
-    Unselect All Checkboxes
-    Select Checkbox  dataset
+    Input Text  id=startdateinput  ${EMPTY}
     Click Button  id=search_button
-    Set Selenium Implicit Wait          2
-    Page Should Contain Element         xpath=//table[@id='dataTable']//img[@alt='dataset']
-    Page Should Not Contain Element         xpath=//table[@id='dataTable']//img[@alt='image']
-    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='project']
-    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='plate']
+    Wait Until Page Contains Element  id=dataTable  1000
+    ${item2}  Get Table Cell   ${XpathTable}  2   2
+    # Click Link    ${item2}
+    For-Loop-In-Range
 
-    # Select Project Alone
-    Unselect All Checkboxes
-    Select Checkbox  project
-    Click Button  id=search_button
-    Set Selenium Implicit Wait          2
-    Page Should Contain Element         xpath=//table[@id='dataTable']//img[@alt='project']
-    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='dataset']
-    Page Should Not Contain Element         xpath=//table[@id='dataTable']//img[@alt='image']
-    Page Should Not Contain Element     xpath=//table[@id='dataTable']//img[@alt='plate']
+#     Input Text  id=enddateinput    2014-05-15
+#     Click Button    id=search_button
+#     Alert Should Be Present
+
+#     Input Text  id=startdateinput   2014-05-15
+#     Input Text  id=enddateinput     2013-05-14
+#     Click Button    id=search_button
+#     Page Should Not Contain     ${XpathTable}
 
 
+# Test Close All Browsers
+#     ${se2lib}=    Get Library Instance    Selenium2Library
+#     ${time} =       Subtract Date From Date      2014-05-28 12:05:52     2014-05-28 12:05:52
 
+
+#     Close Browser    
+    
+
+    
 
