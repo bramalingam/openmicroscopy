@@ -7,23 +7,23 @@ ${OMERO PORT}           4064
 ${ROOT USERNAME}        root
 ${ROOT PASSWORD}        omero
 
-${USERNAME}             user-1
-${PASSWORD}             ome
-${FULL NAME}            user-1 user-1
+${USERNAME}             root
+${PASSWORD}             Asdfgf;lkjhj1
+${FULL NAME}            root root
 
 # Web config
-${WEB HOST}             octopus.openmicroscopy.org/merge
-${WEB PORT}             8080
+${WEB HOST}             localhost
+${WEB PORT}             4080
 ${SERVER_ID}            1
 
 ${BROWSER}              Firefox
 ${DELAY}                0
 
-${LOGIN URL}            http://${WEB HOST}/webclient/login/
-${WELCOME URL}          http://${WEB HOST}/webclient/
-${SEARCH URL}			http://${WEB HOST}/webclient/search/
+${LOGIN URL}            http://${WEB HOST}:${WEB PORT}/webclient/login/
+${WELCOME URL}          http://${WEB HOST}:${WEB PORT}/webclient/
+${SEARCH URL}			http://${WEB HOST}:${WEB PORT}/webclient/search/
 
-${WEBADMIN WELCOME URL}     http://${WEB HOST}/webadmin/
+${WEBADMIN WELCOME URL}     http://${WEB HOST}:${WEB PORT}/webadmin/
 ${WEBADMIN LOGIN URL}       ${LOGIN URL}?url=%2Fwebadmin%2F
 
 ${USERS URL}            ${WEBADMIN WELCOME URL}experimenters/
