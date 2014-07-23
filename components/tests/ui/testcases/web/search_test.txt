@@ -103,152 +103,152 @@ Test Default Search Check
     Wait Until Page Contains Element  id=dataTable  1000
  
 
-# Test Check Search Results
-#     [Documentation]     Check if results are displayed on the centre pane
+Test Check Search Results
+    [Documentation]     Check if results are displayed on the centre pane
 
-#     Page Should Contain Element     id=dataTable
-#     Page Should Contain Element     id=center_panel
-#     Table Header Should Contain     ${XpathTable}  Type
-#     Table Header Should Contain     ${XpathTable}  Name
-#     Table Header Should Contain     ${XpathTable}  Imported
-#     Table Header Should Contain     ${XpathTable}  Group
-#     Table Header Should Contain     ${XpathTable}  Link
-#     Table Header Should Contain     ${XpathTable}  Acquired
-#     Page Should Contain Element     ${XpathPlate}
-#     Page Should Contain Element     ${XpathDataset}
-#     Page Should Contain Element     ${XpathProject}
-#     Page Should Contain Element     ${XpathImage}
+    Page Should Contain Element     id=dataTable
+    Page Should Contain Element     id=center_panel
+    Table Header Should Contain     ${XpathTable}  Type
+    Table Header Should Contain     ${XpathTable}  Name
+    Table Header Should Contain     ${XpathTable}  Imported
+    Table Header Should Contain     ${XpathTable}  Group
+    Table Header Should Contain     ${XpathTable}  Link
+    Table Header Should Contain     ${XpathTable}  Acquired
+    Page Should Contain Element     ${XpathPlate}
+    Page Should Contain Element     ${XpathDataset}
+    Page Should Contain Element     ${XpathProject}
+    Page Should Contain Element     ${XpathImage}
 
     
-# Test Default Search Selections
-# 	[Documentation]		Check that the objects searched for are Projects, Datasets, Images, Screens, Plates (all checkboxes selected by default).
+Test Default Search Selections
+	[Documentation]		Check that the objects searched for are Projects, Datasets, Images, Screens, Plates (all checkboxes selected by default).
 
-#     Checkbox Should Be Selected  image
-#     Checkbox Should Be Selected  dataset
-#     Checkbox Should Be Selected  project
-#     Checkbox Should Be Selected  plate
-#     Checkbox Should Be Selected  screen
-#     Checkbox Should Not Be Selected  name
-#     Checkbox Should Not Be Selected  description
-#     Checkbox Should Not Be Selected  annotation
-#     Click Button  id=search_button
+    Checkbox Should Be Selected  image
+    Checkbox Should Be Selected  dataset
+    Checkbox Should Be Selected  project
+    Checkbox Should Be Selected  plate
+    Checkbox Should Be Selected  screen
+    Checkbox Should Not Be Selected  name
+    Checkbox Should Not Be Selected  description
+    Checkbox Should Not Be Selected  annotation
+    Click Button  id=search_button
     
-# Test Additional Search With Selections
-# 	[Documentation]		Checkbox selections for name description and annotation and search again
+Test Additional Search With Selections
+	[Documentation]		Checkbox selections for name description and annotation and search again
 
-#     Select Checkbox  name    
-#     Select Checkbox  description    
-#     Select Checkbox  annotation
-#     Click Button  id=search_button
+    Select Checkbox  name    
+    Select Checkbox  description    
+    Select Checkbox  annotation
+    Click Button  id=search_button
     
-# Test Check Search Date Field
-# 	[Documentation]     Check that no date range has been chosen by default.
+Test Check Search Date Field
+	[Documentation]     Check that no date range has been chosen by default.
     
-#     Page Should Contain Textfield  id=startdateinput
-#     Textfield Value Should be  id=startdateinput  ${EMPTY}
-#     Page Should Contain Textfield  id=enddateinput
-#     Textfield Value Should be  id=enddateinput  ${EMPTY}
+    Page Should Contain Textfield  id=startdateinput
+    Textfield Value Should be  id=startdateinput  ${EMPTY}
+    Page Should Contain Textfield  id=enddateinput
+    Textfield Value Should be  id=enddateinput  ${EMPTY}
 
-# Test Check Search Default Group Selection
-# 	[Documentation]		Check that the default Scope for the search is All Groups
+Test Check Search Default Group Selection
+	[Documentation]		Check that the default Scope for the search is All Groups
 
-#     @{In group}  Get List Items  id=searchGroup
-#     ${expected_group}  Get Selected List Label  id=searchGroup
-#     Should Be Equal  ${expected_group}  ${Default_Srch_Group}
+    @{In group}  Get List Items  id=searchGroup
+    ${expected_group}  Get Selected List Label  id=searchGroup
+    Should Be Equal  ${expected_group}  ${Default_Srch_Group}
 
-# Test Check Search Default User Selection
-# 	[Documentation]		Check : user matching the username you are logged in as, e.g user-4 user-4.
+Test Check Search Default User Selection
+	[Documentation]		Check : user matching the username you are logged in as, e.g user-4 user-4.
 
-#     @{DataOwned by}  Get List Items  id=searchByGroupMember--1
-#     ${expected_user}  Get Selected List Label  id=searchByGroupMember--1
-#     Should Be Equal  ${expected_user}  ${FULL NAME} 
+    @{DataOwned by}  Get List Items  id=searchByGroupMember--1
+    ${expected_user}  Get Selected List Label  id=searchByGroupMember--1
+    Should Be Equal  ${expected_user}  ${FULL NAME} 
 
-# Test Check Search Default Date Selection
-#     [Documentation]     Check : Default selection for search should be using Import Date
+Test Check Search Default Date Selection
+    [Documentation]     Check : Default selection for search should be using Import Date
 
-#     @{Default Date:}  Get List Items  id=useAcquisitionDate
-#     ${expected_date}  Get Selected List Label  id=useAcquisitionDate
-#     Should Be Equal  ${expected_date}  ${Default_Srch_Date}
+    @{Default Date:}  Get List Items  id=useAcquisitionDate
+    ${expected_date}  Get Selected List Label  id=useAcquisitionDate
+    Should Be Equal  ${expected_date}  ${Default_Srch_Date}
 
-# Test Object Types and Fields
+Test Object Types and Fields
 
-#     # Select Image Alone
-#     Unselect All Checkboxes
-#     Select Checkbox  image
-#     Click Button  id=search_button
-#     Set Selenium Implicit Wait          ${ImplicitDELAY}
-#     Page Should Contain Element         ${XpathImage}
-#     Page Should Not Contain Element     ${XpathDataset}
-#     Page Should Not Contain Element     ${XpathProject}
-#     Page Should Not Contain Element     ${XpathPlate}
+    # Select Image Alone
+    Unselect All Checkboxes
+    Select Checkbox  image
+    Click Button  id=search_button
+    Set Selenium Implicit Wait          ${ImplicitDELAY}
+    Page Should Contain Element         ${XpathImage}
+    Page Should Not Contain Element     ${XpathDataset}
+    Page Should Not Contain Element     ${XpathProject}
+    Page Should Not Contain Element     ${XpathPlate}
 
-#     # Select Dataset Alone
-#     Unselect All Checkboxes
-#     Select Checkbox  dataset
-#     Click Button  id=search_button
-#     Set Selenium Implicit Wait          ${ImplicitDELAY}
-#     Page Should Contain Element     ${XpathDataset}
-#     Page Should Not Contain Element     ${XpathImage}
-#     Page Should Not Contain Element     ${XpathProject}
-#     Page Should Not Contain Element     ${XpathPlate}
+    # Select Dataset Alone
+    Unselect All Checkboxes
+    Select Checkbox  dataset
+    Click Button  id=search_button
+    Set Selenium Implicit Wait          ${ImplicitDELAY}
+    Page Should Contain Element     ${XpathDataset}
+    Page Should Not Contain Element     ${XpathImage}
+    Page Should Not Contain Element     ${XpathProject}
+    Page Should Not Contain Element     ${XpathPlate}
 
-#     # Select Project Alone
-#     Unselect All Checkboxes
-#     Select Checkbox  project
-#     Click Button  id=search_button
-#     Set Selenium Implicit Wait          ${ImplicitDELAY}
-#     Page Should Contain Element         ${XpathProject}
-#     Page Should Not Contain Element     ${XpathDataset}
-#     Page Should Not Contain Element     ${XpathImage}
-#     Page Should Not Contain Element     ${XpathPlate}
+    # Select Project Alone
+    Unselect All Checkboxes
+    Select Checkbox  project
+    Click Button  id=search_button
+    Set Selenium Implicit Wait          ${ImplicitDELAY}
+    Page Should Contain Element         ${XpathProject}
+    Page Should Not Contain Element     ${XpathDataset}
+    Page Should Not Contain Element     ${XpathImage}
+    Page Should Not Contain Element     ${XpathPlate}
 
-# Test Date Range
+Test Date Range
 
-#     #Check with a From and End date
-#     Input Text  name=query  ${Search_Query}
-#     Input Text  id=startdateinput   ${FromDate}
-#     Input Text  id=enddateinput     ${EndDate} 
-#     Select All Checkboxes
-#     Click Button    id=search_button
-#     Page Should Not Contain         ${XpathTable}
-#     Set Selenium Implicit Wait      ${ImplicitDELAY}  
-#     Page Should Contain Element     id=center_panel
-#     ${rows}=        Get Matching XPath Count    xpath=//table[@id='dataTable']/tbody/tr
-#     For-Loop-In-Range-Acquired      ${rows}+1
-#     For-Loop-In-Range-Imported      ${rows}+1
+    #Check with a From and End date
+    Input Text  name=query  ${Search_Query}
+    Input Text  id=startdateinput   ${FromDate}
+    Input Text  id=enddateinput     ${EndDate} 
+    Select All Checkboxes
+    Click Button    id=search_button
+    Page Should Not Contain         ${XpathTable}
+    Set Selenium Implicit Wait      ${ImplicitDELAY}  
+    Page Should Contain Element     id=center_panel
+    ${rows}=        Get Matching XPath Count    xpath=//table[@id='dataTable']/tbody/tr
+    For-Loop-In-Range-Acquired      ${rows}+1
+    For-Loop-In-Range-Imported      ${rows}+1
     
-#     #Check with a From date alone
-#     Clear Date Text Field
-#     Input Text  id=startdateinput   ${FromDate}
-#     Click Button  id=search_button
-#     Set Selenium Implicit Wait      ${ImplicitDELAY}
-#     Page Should Contain Element     id=center_panel
-#     ${rows}=        Get Matching XPath Count    xpath=//table[@id='dataTable']/tbody/tr 
-#     ${cols}=        Get Matching XPath Count    xpath=//table[@id='dataTable']/tbody/tr/td
-#     For-Loop-In-Range-Acquired      ${rows}+1
+    #Check with a From date alone
+    Clear Date Text Field
+    Input Text  id=startdateinput   ${FromDate}
+    Click Button  id=search_button
+    Set Selenium Implicit Wait      ${ImplicitDELAY}
+    Page Should Contain Element     id=center_panel
+    ${rows}=        Get Matching XPath Count    xpath=//table[@id='dataTable']/tbody/tr 
+    ${cols}=        Get Matching XPath Count    xpath=//table[@id='dataTable']/tbody/tr/td
+    For-Loop-In-Range-Acquired      ${rows}+1
 
-#     #Check with a End date alone
-#     Clear Date Text Field
-#     Input Text  id=enddateinput     ${EndDate}
-#     Click Button    id=search_button
-#     Alert Should Be Present    
+    #Check with a End date alone
+    Clear Date Text Field
+    Input Text  id=enddateinput     ${EndDate}
+    Click Button    id=search_button
+    Alert Should Be Present    
 
-#     #Check with a From date > End date
-#     Clear Date Text Field
-#     Input Text      id=startdateinput    ${WrongStartDate}
-#     Input Text      id=enddateinput      ${EndDate}
-#     ${text1}         Get Text        id=startdateinput
-#     ${text2}         Get Text        id=enddateinput
-#     Should Be Equal As Strings      ${text1}    ${text2}
-#     Page Should Contain Element         id=dataTable
+    #Check with a From date > End date
+    Clear Date Text Field
+    Input Text      id=startdateinput    ${WrongStartDate}
+    Input Text      id=enddateinput      ${EndDate}
+    ${text1}         Get Text        id=startdateinput
+    ${text2}         Get Text        id=enddateinput
+    Should Be Equal As Strings      ${text1}    ${text2}
+    Page Should Contain Element         id=dataTable
 
-#     #Check with just dates alone (No Search Query)
-#     Clear Search Text Field
-#     Input Text  id=startdateinput   ${FromDate}
-#     Input Text  id=enddateinput     ${EndDate} 
-#     Select All Checkboxes
-#     Click Button    id=search_button
-#     Alert Should Be Present
+    #Check with just dates alone (No Search Query)
+    Clear Search Text Field
+    Input Text  id=startdateinput   ${FromDate}
+    Input Text  id=enddateinput     ${EndDate} 
+    Select All Checkboxes
+    Click Button    id=search_button
+    Alert Should Be Present
 
  
     
@@ -301,7 +301,7 @@ Test Key Word Search
     Should Be True     ${rows2}>${rows1}
     Should Be True     ${rows2}>=${rows1}
 
-# Test Close All Browsers
-#     ${se2lib}=    Get Library Instance    Selenium2Library
-#     Close Browser     
+Test Close All Browsers
+    ${se2lib}=    Get Library Instance    Selenium2Library
+    Close Browser     
 
