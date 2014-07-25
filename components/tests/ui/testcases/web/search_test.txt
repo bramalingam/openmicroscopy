@@ -1,15 +1,10 @@
 *** Settings ***
-Documentation     Tests creation of Projects and Datasets
-...               and enabled status of create P/D/S options
-...
-...               This test requires P/D/I in hierarchy.
+Documentation     Tests Search on Web
 ...               https://www.openmicroscopy.org/private/ome-internal/testing_scenarios/Search.html
 
 Resource          ../config.txt
-Resource          ../../resources/web/login.txt
-Resource          ../../resources/web/tree.txt
-Resource          ../../resources/web/thumbs.txt
 Library           DateTime
+Library           Selenium2Library      run_on_failure=Nothing
 
 *** Variables ***
 
@@ -32,8 +27,40 @@ ${EndDate}              2014-07-17
 ${WrongStartDate}       2014-07-20
 ${AcquiredDateCol}      4
 ${NotAnImage}           3
-                        
+
+@{SearchKeyWords}       *  ?  Â¡  â¬  Â¢  â  Â§  Ê  â¢  Âª  Ê  â  â   Â±  !  @  Â£  $  %  ^  &  (  )  _  +  __  â  Â´  Â®  â   Â¥  Â¨  ã  Ï  ^ã  â  â  ã  ã  â  Æ  Â©  Ë  â  Ë  Â¬  â¦  ã  Â«  `  Î©  â  ã  â  â«  ~  Âµ  â¤  â¥  ã  Â±  !  @  Â£  $  %  ^  &  (  )  _  +  Q  W  E  R  T  Y  U  I  O  P  {  }  A  S  D  F  G  H  J  K  L  :  "  |  ~  Z  X  C  V  B  N  M  <  >  ?  Â§  1  2  3  4  5  6  7  8  9  0  -  =  q  w  e  r  t  y  u  i  o  p  [  ]  a  s  d  f  g  h  j  k  l  ;  '  \  `  z  x  c  v  b  n  m  ,  .  /  (a)  (*)  (?)  *.svs  *.ome.tiff  *.*  a, b  a-b  a_b  a/b  */  ?/  *_  *-  *=  *{}  *[]  *^  **  *a*  *1*  *,*  *-*  ?.*  ?*  *?  a?  1?  123  a1n23;(-)*j.-t  GFP-ABC  GFP-abc  GFP_ABC.svs  "GFP ABC"  "GFP_ABC"  "GFP-ABC"  "GFP.ABC.ome.tiff"  GFP AND ABC  GFP and ABC  "#"]                 
+
 *** Keywords ***
+
+User "${username}" logs in with password "${password}"
+    Open Browser To Login Page
+    Input username    ${username}
+    Input password    ${password}
+    Submit credentials
+    Welcome Page Should Be Open
+
+Welcome Page Should Be Open
+    Location Should Be    ${WELCOME URL}
+    Title Should Be       Webclient
+
+Open Browser To Login Page
+    Open Browser          ${LOGIN URL}    ${BROWSER}
+    Set Selenium Speed    ${DELAY}
+    Login Page Should Be Open
+
+Input Username
+    [Arguments]   ${username}
+    Input Text    username    ${username}
+
+Input Password
+    [Arguments]   ${password}
+    Input Text    password    ${password}
+
+Submit Credentials
+    Click Button    Login
+
+Login Page Should Be Open
+    Title Should Be    OMERO.web - Login
 
 Unselect All Checkboxes
     
@@ -74,6 +101,21 @@ For-Loop-In-Range-Imported       [Arguments]         ${rows}
     \    ${RANDOM_STRING}   Get Table Cell    ${XpathTable}    ${INDEX}    3
     \    Run Keyword Unless    "${RANDOM_STRING}" == "${EMPTY}"  Condition Check Imported Date  
 
+For-Loop-In-Range-Search-Keywords
+    
+    : FOR    ${INDEX}    IN    @{SearchKeyWords}
+    \    Input Text      name=query      ${INDEX}
+    \    Click Button    id=search_button
+    # \    Run Keyword And Ignore Error    Alert Should Be Present
+    \    ${status}   Run Keyword And Return Status  Alert Should Be Present
+    \   Log To Console   [Searched for ${INDEX} and returned ${status} for alert should be present] 
+    \   Run Keyword If    '${status}' == 'True'    Input Text   name=query  ${INDEX}
+    \   Run Keyword If    '${status}' == 'True'    Click Button     id=search_button
+    \   ${AlertMessage}   Run Keyword If    '${status}' == 'True'   Get Alert Message    
+    \   Run Keyword If    '${status}' == 'True'     Log To Console  [Searched for ${INDEX} and returned ${status} for alert should be present. The alert message was ${AlertMessage}]   
+
+    # \    ${ret} =   Call Selenium API   is_element_present  id=dataTable
+
 Condition Check Imported Date
     ${time} =  Subtract Date From Date  ${RANDOM_STRING}  ${DayEndTime}  
     Should Be True     ${time}<=0
@@ -89,6 +131,7 @@ Clear Search Text Field
     Input Text  name=query          ${EMPTY}
     Textfield Value Should be  id=id_search_query   ${EMPTY}
     Textfield Value Should be  name=query           ${EMPTY}
+    
 
 *** Test Cases ***
 
@@ -187,7 +230,7 @@ Test Object Types and Fields
     Select Checkbox  dataset
     Click Button  id=search_button
     Set Selenium Implicit Wait          ${ImplicitDELAY}
-    Page Should Contain Element     ${XpathDataset}
+    Page Should Contain Element         ${XpathDataset}
     Page Should Not Contain Element     ${XpathImage}
     Page Should Not Contain Element     ${XpathProject}
     Page Should Not Contain Element     ${XpathPlate}
@@ -205,7 +248,7 @@ Test Object Types and Fields
 Test Date Range
 
     #Check with a From and End date
-    Input Text  name=query  ${Search_Query}
+    Input Text  name=query          ${Search_Query}
     Input Text  id=startdateinput   ${FromDate}
     Input Text  id=enddateinput     ${EndDate} 
     Select All Checkboxes
@@ -239,7 +282,7 @@ Test Date Range
     Input Text      id=enddateinput      ${EndDate}
     ${text1}         Get Text        id=startdateinput
     ${text2}         Get Text        id=enddateinput
-    Should Be Equal As Strings      ${text1}    ${text2}
+    Should Be Equal As Strings           ${text1}    ${text2}
     Page Should Contain Element         id=dataTable
 
     #Check with just dates alone (No Search Query)
@@ -297,9 +340,13 @@ Test Key Word Search
     ${rows2}=        Get Matching XPath Count    xpath=//table[@id='dataTable']/tbody/tr
 
     #Checkpoints for results obtained from the above search
-    Should Be True     ${rows1}>${rows}
-    Should Be True     ${rows2}>${rows1}
-    Should Be True     ${rows2}>=${rows1}
+    Should Be True                      ${rows1}>=${rows}
+    Should Be True                      ${rows2}>=${rows1}
+    Should Be True                      ${rows2}>=${rows1}
+
+Test All Keywords
+
+    For-Loop-In-Range-Search-Keywords
 
 Test Close All Browsers
     ${se2lib}=    Get Library Instance    Selenium2Library
