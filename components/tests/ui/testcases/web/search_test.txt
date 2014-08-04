@@ -2,7 +2,8 @@
 Documentation     Tests Search on Web
 ...               https://www.openmicroscopy.org/private/ome-internal/testing_scenarios/Search.html
 
-Resource          ../config.txt
+# Resource          ../config.txt
+Resource          ../config_octopus.txt
 Library           DateTime
 Library           Selenium2Library      run_on_failure=Nothing
 
@@ -14,7 +15,8 @@ ${XpathProject}         xpath=//table[@id='dataTable']//img[@alt='project']
 ${XpathPlate}           xpath=//table[@id='dataTable']//img[@alt='plate']
 ${XpathTable}           xpath=//table[@id='dataTable']
 ${XpathTableColumn}     xpath=//table[@id='dataTable']//tr/td[position()=3]
-${Search_Query}         test
+${Search_Query}         1
+${Search_Query1}         test
 ${Default_Srch_Group}   All Groups
 ${Default_Srch_Date}    Import date
 ${Table_Header}         Name
@@ -28,7 +30,7 @@ ${WrongStartDate}       2014-07-20
 ${AcquiredDateCol}      4
 ${NotAnImage}           3
 
-@{SearchKeyWords}       *  ?  Â¡  â¬  Â¢  â  Â§  Ê  â¢  Âª  Ê  â  â   Â±  !  @  Â£  $  %  ^  &  (  )  _  +  __  â  Â´  Â®  â   Â¥  Â¨  ã  Ï  ^ã  â  â  ã  ã  â  Æ  Â©  Ë  â  Ë  Â¬  â¦  ã  Â«  `  Î©  â  ã  â  â«  ~  Âµ  â¤  â¥  ã  Â±  !  @  Â£  $  %  ^  &  (  )  _  +  Q  W  E  R  T  Y  U  I  O  P  {  }  A  S  D  F  G  H  J  K  L  :  "  |  ~  Z  X  C  V  B  N  M  <  >  ?  Â§  1  2  3  4  5  6  7  8  9  0  -  =  q  w  e  r  t  y  u  i  o  p  [  ]  a  s  d  f  g  h  j  k  l  ;  '  \  `  z  x  c  v  b  n  m  ,  .  /  (a)  (*)  (?)  *.svs  *.ome.tiff  *.*  a, b  a-b  a_b  a/b  */  ?/  *_  *-  *=  *{}  *[]  *^  **  *a*  *1*  *,*  *-*  ?.*  ?*  *?  a?  1?  123  a1n23;(-)*j.-t  GFP-ABC  GFP-abc  GFP_ABC.svs  "GFP ABC"  "GFP_ABC"  "GFP-ABC"  "GFP.ABC.ome.tiff"  GFP AND ABC  GFP and ABC  "#"]                 
+@{SearchKeyWords}       *  ?  *.dv  Â¡  â¬  Â¢  â  Â§  Ê  â¢  Âª  Ê  â  â   Â±  !  @  Â£  $  %  ^  &  (  )  _  +  __  â  Â´  Â®  â   Â¥  Â¨  ã  Ï  ^ã  â  â  ã  ã  â  Æ  Â©  Ë  â  Ë  Â¬  â¦  ã  Â«  `  Î©  â  ã  â  â«  ~  Âµ  â¤  â¥  ã  Â±  !  @  Â£  $  %  ^  &  (  )  _  +  Q  W  E  R  T  Y  U  I  O  P  {  }  A  S  D  F  G  H  J  K  L  :  "  |  ~  Z  X  C  V  B  N  M  <  >  ?  Â§  1  2  3  4  5  6  7  8  9  0  -  =  q  w  e  r  t  y  u  i  o  p  [  ]  a  s  d  f  g  h  j  k  l  ;  '  \  `  z  x  c  v  b  n  m  ,  .  /  (a)  (*)  (?)  *.svs  *.ome.tiff  *.*  a, b  a-b  a_b  a/b  */  ?/  *_  *-  *=  *{}  *[]  *^  **  *a*  *1*  *,*  *-*  ?.*  ?*  *?  a?  1?  123  a1n23;(-)*j.-t  GFP-ABC  GFP-abc  GFP_ABC.svs  "GFP ABC"  "GFP_ABC"  "GFP-ABC"  "GFP.ABC.ome.tiff"  GFP AND ABC  GFP and ABC  "#"                 
 
 *** Keywords ***
 
@@ -67,22 +69,22 @@ Unselect All Checkboxes
     Unselect Checkbox  name
     Unselect Checkbox  description
     Unselect Checkbox  annotation
-    Unselect Checkbox  image
-    Unselect Checkbox  dataset
-    Unselect Checkbox  project
-    Unselect Checkbox  plate
-    Unselect Checkbox  screen
+    Unselect Checkbox  images
+    Unselect Checkbox  datasets
+    Unselect Checkbox  projects
+    Unselect Checkbox  plates
+    Unselect Checkbox  screens
 
 Select All Checkboxes
     
     Select Checkbox  name
     Select Checkbox  description
     Select Checkbox  annotation
-    Select Checkbox  image
-    Select Checkbox  dataset
-    Select Checkbox  project
-    Select Checkbox  plate
-    Select Checkbox  screen
+    Select Checkbox  images
+    Select Checkbox  datasets
+    Select Checkbox  projects
+    Select Checkbox  plates
+    Select Checkbox  screens
 
 Omero Default Search
     
@@ -92,13 +94,13 @@ Omero Default Search
 For-Loop-In-Range-Acquired       [Arguments]         ${rows}
     : FOR    ${INDEX}    IN RANGE    2    ${rows}
     \    Log    ${INDEX}
-    \    ${RANDOM_STRING}   Get Table Cell    ${XpathTable}    ${INDEX}    4
+    \    ${RANDOM_STRING}   Get Table Cell    ${XpathTable}    ${INDEX}    3
     \    ${time} =       Subtract Date From Date      ${RANDOM_STRING}     ${FromDateWithTime}
     \    Should Be True     ${time}>=0
    
 For-Loop-In-Range-Imported       [Arguments]         ${rows}
     : FOR    ${INDEX}    IN RANGE    2    ${rows}
-    \    ${RANDOM_STRING}   Get Table Cell    ${XpathTable}    ${INDEX}    3
+    \    ${RANDOM_STRING}   Get Table Cell    ${XpathTable}    ${INDEX}    4
     \    Run Keyword Unless    "${RANDOM_STRING}" == "${EMPTY}"  Condition Check Imported Date  
 
 For-Loop-In-Range-Search-Keywords
@@ -166,11 +168,11 @@ Test Check Search Results
 Test Default Search Selections
 	[Documentation]		Check that the objects searched for are Projects, Datasets, Images, Screens, Plates (all checkboxes selected by default).
 
-    Checkbox Should Be Selected  image
-    Checkbox Should Be Selected  dataset
-    Checkbox Should Be Selected  project
-    Checkbox Should Be Selected  plate
-    Checkbox Should Be Selected  screen
+    Checkbox Should Be Selected  images
+    Checkbox Should Be Selected  datasets
+    Checkbox Should Be Selected  projects
+    Checkbox Should Be Selected  plates
+    Checkbox Should Be Selected  screens
     Checkbox Should Not Be Selected  name
     Checkbox Should Not Be Selected  description
     Checkbox Should Not Be Selected  annotation
@@ -217,7 +219,7 @@ Test Object Types and Fields
 
     # Select Image Alone
     Unselect All Checkboxes
-    Select Checkbox  image
+    Select Checkbox  images
     Click Button  id=search_button
     Set Selenium Implicit Wait          ${ImplicitDELAY}
     Page Should Contain Element         ${XpathImage}
@@ -227,7 +229,7 @@ Test Object Types and Fields
 
     # Select Dataset Alone
     Unselect All Checkboxes
-    Select Checkbox  dataset
+    Select Checkbox  datasets
     Click Button  id=search_button
     Set Selenium Implicit Wait          ${ImplicitDELAY}
     Page Should Contain Element         ${XpathDataset}
@@ -237,7 +239,7 @@ Test Object Types and Fields
 
     # Select Project Alone
     Unselect All Checkboxes
-    Select Checkbox  project
+    Select Checkbox  projects
     Click Button  id=search_button
     Set Selenium Implicit Wait          ${ImplicitDELAY}
     Page Should Contain Element         ${XpathProject}
@@ -319,22 +321,25 @@ Test Key Word Search
 
     #Search 'test' with leading wildcard,trailing wildcard and leading&trailing wildcard and compare results
     Clear Search Text Field
-    Input Text     name=query           ${Search_Query}
+    Input Text     name=query           ${Search_Query1}
     Click Button    id=search_button
+    Wait Until Page Contains Element  id=dataTable  10
     Set Selenium Implicit Wait          ${ImplicitDELAY}
     Page Should Contain Element         ${XpathTable}
     ${rows}=        Get Matching XPath Count    xpath=//table[@id='dataTable']/tbody/tr
 
     Clear Search Text Field
-    Input Text     name=query           ${Search_Query}*
+    Input Text     name=query           ${Search_Query1}*
     Click Button    id=search_button
+    Wait Until Page Contains Element  id=dataTable  10
     Set Selenium Implicit Wait          ${ImplicitDELAY}
     Page Should Contain Element         ${XpathTable}
     ${rows1}=        Get Matching XPath Count    xpath=//table[@id='dataTable']/tbody/tr
 
     Clear Search Text Field
-    Input Text     name=query           *${Search_Query}*
+    Input Text     name=query           *${Search_Query1}*
     Click Button    id=search_button
+    Wait Until Page Contains Element  id=dataTable  10
     Set Selenium Implicit Wait          ${ImplicitDELAY}
     Page Should Contain Element         ${XpathTable}
     ${rows2}=        Get Matching XPath Count    xpath=//table[@id='dataTable']/tbody/tr
