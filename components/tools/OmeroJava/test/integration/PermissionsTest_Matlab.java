@@ -134,7 +134,6 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 			{
 				ExperimenterGroupI group = new ExperimenterGroupI(gids.get(j), false);
 				session.setSecurityContext(group);
-//				factory = client.getSession();
 		        iUpdate = session.getUpdateService();
 		        mmFactory = new ModelMockFactory(session.getPixelsService());
 				
