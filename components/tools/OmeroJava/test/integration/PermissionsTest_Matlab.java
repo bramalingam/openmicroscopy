@@ -43,6 +43,7 @@ import omero.cmd.HandlePrx;
 import omero.cmd.Request;
 import omero.cmd.Response;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import pojos.GroupData;
@@ -372,7 +373,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 
 					ExperimenterGroupI group = new ExperimenterGroupI(gids.get(k), false);
 					session.setSecurityContext(group);
-					
+
 					ExperimenterGroup group2 = session.getAdminService().getGroup(gids.get(k));
 					PermissionData perms = new PermissionData(group2.getDetails().getPermissions());
 					String permsAsString = getPermissions(perms.getPermissionsLevel());
@@ -382,11 +383,11 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 
 					Long targetgroup = gids.get(l);
 					Chgrp chgrp = new Chgrp();
-					
+
 					ExperimenterGroup group1 =  session.getAdminService().getGroup(targetgroup);
 					PermissionData perms1 = new PermissionData(group1.getDetails().getPermissions());
 					String permsAsString1 = getPermissions(perms1.getPermissionsLevel());
-					
+
 					ParametersI params = new omero.sys.ParametersI();
 					params.exp(omero.rtypes.rlong(userid));
 
@@ -408,18 +409,18 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 					long ownerid = img.getDetails().getOwner().getId().getValue();
 
 					//Fetch fileset prior to move
-//					System.out.print(imageid);
-//					System.out.printf("%n");
-//					System.out.print(groupid);
-//					System.out.printf("%n");
-//					System.out.print(groupId);
-//					System.out.printf("%n");
-//					System.out.print(userid);
-//					System.out.printf("%n");
-//					System.out.print(ownerid);
-//					System.out.printf("%n");
-//					System.out.print(targetgroup);
-//					System.out.printf("%n");
+					//					System.out.print(imageid);
+					//					System.out.printf("%n");
+					//					System.out.print(groupid);
+					//					System.out.printf("%n");
+					//					System.out.print(groupId);
+					//					System.out.printf("%n");
+					//					System.out.print(userid);
+					//					System.out.printf("%n");
+					//					System.out.print(ownerid);
+					//					System.out.printf("%n");
+					//					System.out.print(targetgroup);
+					//					System.out.printf("%n");
 
 					List<Request> list = new ArrayList<Request>();
 					chgrp.id = imageid;
@@ -441,15 +442,29 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 						System.out.printf("%n");
 					}
 					if (response instanceof DoAllRsp) {
+												
 						List<Response> responses = ((DoAllRsp) response).responses;
 						if (responses.size() == 1) {
 							Response responses1 = responses.get(0);	
-//							System.out.print(responses1.toString());
+							//							System.out.print(responses1.toString());
 							//Switch context to target group to extract the annotation links per owner
 							ExperimenterGroupI group12 = new ExperimenterGroupI(targetgroup, false);
 							session.setSecurityContext(group12);
 							iQuery = session.getQueryService();
 							Image i = (Image) iQuery.get("Image", imageid);
+
+							Map<Long, Long> annotationslink = img.getAnnotationLinksCountPerOwner();
+							Map<Long, Long> annotationslink1 = i.getAnnotationLinksCountPerOwner();
+							
+							if(annotationslink.get(userid)==annotationslink1.get(userid)){
+//								System.out.print("success: User : " + userid + " " +ownerid + "tried moving image " + imageid + " from " + groupid + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
+//								System.out.printf("%n");
+							} else {
+								System.out.print("Failure with annotations: User : " + userid + " " +ownerid + "tried moving image " + imageid + " from " + groupid + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
+								System.out.printf("%n");
+							}
+
+
 						}
 
 					} else if (response instanceof ERR) {
@@ -459,19 +474,17 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 							while (kk.hasNext()) {
 								ImageAnnotationLink link = kk.next();
 								System.err.println(link.getDetails().getOwner().getId().getValue());
+								
 							}
 						}
-						
+
 						ERR error = (ERR) response;
 						System.err.println(error);
 						System.out.printf("%n");
 						System.out.print("Failure : User : " + userid + " " +ownerid + "tried moving image " + imageid + " from " + groupid + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
 						System.out.printf("%n");
-						
+//						
 					}		
-
-
-
 				}
 
 			}
@@ -499,16 +512,16 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		return fileset;
 	}
 
-	public static void main(String[] args)
-	{
-		PermissionsTest_Matlab test = new PermissionsTest_Matlab();
-		try {
-			test.moveAllImages();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
+//	public static void main(String[] args)
+//	{
+//		PermissionsTest_Matlab test = new PermissionsTest_Matlab();
+//		try {
+//			test.moveAllImages();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//	}
 }
 
 
