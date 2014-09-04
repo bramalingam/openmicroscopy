@@ -42,8 +42,10 @@ import omero.cmd.ERR;
 import omero.cmd.HandlePrx;
 import omero.cmd.Request;
 import omero.cmd.Response;
+import omero.cmd.SessionPrx;
 
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import pojos.GroupData;
@@ -358,7 +360,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		//		setGroupUp();
 		//		testImagesSetup();
 		//		annotateAllImages();
-
+		
 		for (int j=0 ; j<users.length ; j++)
 		{
 			omero.client client = new omero.client("localhost");
@@ -442,7 +444,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 						System.out.printf("%n");
 					}
 					if (response instanceof DoAllRsp) {
-												
+
 						List<Response> responses = ((DoAllRsp) response).responses;
 						if (responses.size() == 1) {
 							Response responses1 = responses.get(0);	
@@ -455,10 +457,10 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 
 							Map<Long, Long> annotationslink = img.getAnnotationLinksCountPerOwner();
 							Map<Long, Long> annotationslink1 = i.getAnnotationLinksCountPerOwner();
-							
+
 							if(annotationslink.get(userid)==annotationslink1.get(userid)){
-//								System.out.print("success: User : " + userid + " " +ownerid + "tried moving image " + imageid + " from " + groupid + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
-//								System.out.printf("%n");
+								//								System.out.print("success: User : " + userid + " " +ownerid + "tried moving image " + imageid + " from " + groupid + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
+								//								System.out.printf("%n");
 							} else {
 								System.out.print("Failure with annotations: User : " + userid + " " +ownerid + "tried moving image " + imageid + " from " + groupid + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
 								System.out.printf("%n");
@@ -474,7 +476,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 							while (kk.hasNext()) {
 								ImageAnnotationLink link = kk.next();
 								System.err.println(link.getDetails().getOwner().getId().getValue());
-								
+
 							}
 						}
 
@@ -483,7 +485,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 						System.out.printf("%n");
 						System.out.print("Failure : User : " + userid + " " +ownerid + "tried moving image " + imageid + " from " + groupid + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
 						System.out.printf("%n");
-//						
+						//						
 					}		
 				}
 
@@ -492,6 +494,112 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		}
 
 	}
+
+	@DataProvider(name="locale")
+	public List<Object> createData() throws Exception{
+		List<Object> list = new ArrayList<Object>();
+		for (int j=0 ; j<users.length ; j++)
+		{
+			omero.client client = new omero.client("localhost");
+			ServiceFactoryPrx session = client.createSession(users[j], password);
+
+			Experimenter user1 = session.getAdminService().lookupExperimenter(users[j]);
+			List<Long> gids = session.getAdminService().getMemberOfGroupIds(user1);
+			for ( int k=0 ; k< gids.size() ; k++)
+			{
+
+				for ( int l=0 ; l<gids.size() ; l++) {
+
+					ExperimenterGroupI group = new ExperimenterGroupI(gids.get(k), false);
+					session.setSecurityContext(group);
+
+					ExperimenterGroup group2 = session.getAdminService().getGroup(gids.get(k));
+					PermissionData perms = new PermissionData(group2.getDetails().getPermissions());
+					String permsAsString = getPermissions(perms.getPermissionsLevel());
+
+					Long userid = session.getAdminService().getEventContext().userId;
+					Long groupId = session.getAdminService().getEventContext().groupId;
+
+					Long targetgroup = gids.get(l);
+					Chgrp chgrp = new Chgrp();
+
+					ExperimenterGroup group1 =  session.getAdminService().getGroup(targetgroup);
+					PermissionData perms1 = new PermissionData(group1.getDetails().getPermissions());
+					String permsAsString1 = getPermissions(perms1.getPermissionsLevel());
+
+					ParametersI params = new omero.sys.ParametersI();
+					params.exp(omero.rtypes.rlong(userid));
+
+					IContainerPrx proxy = session.getContainerService();
+					List<Image> imageList1 = proxy.getUserImages(params);
+					if (imageList1.size()==0){
+
+						iUpdate = session.getUpdateService();
+						mmFactory = new ModelMockFactory(session.getPixelsService());
+						Image img = (Image) iUpdate.saveAndReturnObject(mmFactory
+								.simpleImage());
+						assertNotNull(img);
+						imageList1 =  proxy.getUserImages(params);
+					}					
+
+					Image img = imageList1.get(0);
+					long groupid = img.getDetails().getGroup().getId().getValue();
+					long imageid = img.getId().getValue();
+					long ownerid = img.getDetails().getOwner().getId().getValue();
+					
+					chgrp.id = imageid;
+					chgrp.type = "/Image";
+					chgrp.grp = targetgroup;
+					List<TestParam> pl = new ArrayList<TestParam>();
+					TestParam c1= new TestParam(chgrp, users[j], password, gids.get(k));
+					list.add(c1);
+					//Source group
+					//username
+					//password
+					//Create an array with [image id, type , targetgroup, source group, username , password] and pass it on to doTest
+//					list.addAll(c1);
+					
+				}
+
+			}
+
+		}
+		
+		return (List<Object>) list;
+
+	}
+
+	@Test(dataProvider="locale")
+	public void doTest(List<TestParam> list) throws Exception{
+
+		
+		TestParam param = list.get(0);
+		
+		String username = param.getUser();
+		String passwd = param.getPass();
+		Long sourcegroup = param.getsrcID();
+		
+		//create session and switch context to source group
+		omero.client client = new omero.client("localhost");
+		ServiceFactoryPrx session1 = client.createSession(username, passwd);
+		
+		ExperimenterGroupI group = new ExperimenterGroupI(sourcegroup, false);
+		session1.setSecurityContext(group);
+		DoAll all = new DoAll();
+		List<Request> list1 = new ArrayList<Request>();
+		list1.add(param.getChgrp());
+		all.requests = list1;
+		HandlePrx handle1 = session1.submit(all);
+		
+		long timeout_move = scalingFactor *  1 * 100;
+
+		CmdCallbackI cb = new CmdCallbackI(client, handle1);
+		cb.loop(10 * all.requests.size(), timeout_move);
+		Response response1 = cb.getResponse();
+	
+			//							
+	}
+
 
 	Fileset fetchFileset(Long imageid,IContainerPrx proxy,ServiceFactoryPrx session) throws Exception{
 
@@ -512,16 +620,38 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		return fileset;
 	}
 
-//	public static void main(String[] args)
-//	{
-//		PermissionsTest_Matlab test = new PermissionsTest_Matlab();
-//		try {
-//			test.moveAllImages();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//
-//	}
+	//	public static void main(String[] args)
+	//	{
+	//		PermissionsTest_Matlab test = new PermissionsTest_Matlab();
+	//		try {
+	//			test.moveAllImages();
+	//		} catch (Exception e) {
+	//			e.printStackTrace();
+	//		}
+	//
+	//	}
+	
+	class TestParam {
+		
+		private Chgrp chgrp;
+		
+		private String user;
+		private String password;
+		private Long srcID;
+		
+		TestParam(Chgrp chgrp, String user, String password, Long srcID)
+		{
+			this.chgrp = chgrp;
+			this.user = user;
+			this.password = password;
+			this.srcID = srcID;
+		}
+		
+		Chgrp getChgrp() { return chgrp; }
+		String getUser() { return user; }
+		String getPass() { return password; }
+		Long getsrcID() { return srcID; }
+	}
 }
 
 
