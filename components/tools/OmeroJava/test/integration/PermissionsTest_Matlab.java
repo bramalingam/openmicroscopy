@@ -354,7 +354,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		}
 	}
 
-	@Test
+//	@Test
 	void moveAllImages() throws Exception {
 
 		//		setGroupUp();
@@ -496,19 +496,19 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 	}
 
 	@DataProvider(name="locale")
-	public List<Object> createData() throws Exception{
+	public Object[][] createData() throws Exception{
 		List<Object> list = new ArrayList<Object>();
-		for (int j=0 ; j<users.length ; j++)
+		for (int j=0 ; j<1 ; j++) //users.length
 		{
 			omero.client client = new omero.client("localhost");
 			ServiceFactoryPrx session = client.createSession(users[j], password);
 
 			Experimenter user1 = session.getAdminService().lookupExperimenter(users[j]);
 			List<Long> gids = session.getAdminService().getMemberOfGroupIds(user1);
-			for ( int k=0 ; k< gids.size() ; k++)
+			for ( int k=0 ; k< 1 ; k++) //gids.size()
 			{
 
-				for ( int l=0 ; l<gids.size() ; l++) {
+				for ( int l=0 ; l < 1 ; l++) { //gids.size()
 
 					ExperimenterGroupI group = new ExperimenterGroupI(gids.get(k), false);
 					session.setSecurityContext(group);
@@ -564,16 +564,22 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 			}
 
 		}
-		
-		return (List<Object>) list;
+		Iterator<Object> j = list.iterator();
+		Object[][] values = new Object[list.size()][1];
+		int index = 0;
+		while (j.hasNext()) {
+			values[index] = new Object[] {j.next()};
+			index++;
+		}
+		return values;
 
 	}
 
 	@Test(dataProvider="locale")
-	public void doTest(List<TestParam> list) throws Exception{
+	public void doTest(Object v1, Object v2) throws Exception{
 
 		
-		TestParam param = list.get(0);
+		TestParam param = (TestParam) v2;
 		
 		String username = param.getUser();
 		String passwd = param.getPass();
@@ -620,16 +626,16 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		return fileset;
 	}
 
-	//	public static void main(String[] args)
-	//	{
-	//		PermissionsTest_Matlab test = new PermissionsTest_Matlab();
-	//		try {
-	//			test.moveAllImages();
-	//		} catch (Exception e) {
-	//			e.printStackTrace();
-	//		}
-	//
-	//	}
+//	public static void main(String[] args)
+//	{
+//		PermissionsTest_Matlab test = new PermissionsTest_Matlab();
+//		try {
+//			test.moveAllImages();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//	}
 	
 	class TestParam {
 		
