@@ -1,7 +1,7 @@
 <!DOCTYPE suite SYSTEM "http://beust.com/testng/testng-1.0.dtd" >
 
-<suite name="OmeroJava.integration" time-out="120000" allow-return-values="true">
-  <test name="integration">
+<suite name="OmeroJava.integration" time-out="120000">
+  <test name="integration" allow-return-values="true">
     <groups>
       <run>
         <exclude name="broken"/>
