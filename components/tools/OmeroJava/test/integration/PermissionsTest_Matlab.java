@@ -502,7 +502,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 	    try {
 	        int index = 0;
 	       
-	        for (int j=0 ; j< 1 ; j++) //users.length
+	        for (int j=0 ; j< users.length ; j++) //users.length
 	        {
 	            omero.client client = new omero.client("localhost");
 	            ServiceFactoryPrx session = client.createSession(users[j], password);
