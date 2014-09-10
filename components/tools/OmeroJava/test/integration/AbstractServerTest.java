@@ -190,7 +190,8 @@ public class AbstractServerTest extends AbstractTest {
      * {@link omero.client} constructor should be called.
      */
     protected omero.client newOmeroClient() {
-        omero.client client = new omero.client(); // OK
+        omero.client client = new omero.client("localhost", 4064); // OK
+        rootpass="ome";
         clients.add(client);
         return client;
     }

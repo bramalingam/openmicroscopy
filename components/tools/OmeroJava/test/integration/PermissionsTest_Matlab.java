@@ -3,10 +3,9 @@ package integration;
 import static org.testng.AssertJUnit.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+
 
 import omero.RLong;
 import omero.RString;
@@ -34,7 +33,6 @@ import omero.model.TermAnnotation;
 import omero.model.TermAnnotationI;
 import omero.sys.ParametersI;
 import omero.sys.Roles;
-import ome.services.chgrp.*;
 import omero.cmd.Chgrp;
 import omero.cmd.DoAll;
 import omero.cmd.CmdCallbackI;
@@ -44,7 +42,6 @@ import omero.cmd.HandlePrx;
 import omero.cmd.OK;
 import omero.cmd.Request;
 import omero.cmd.Response;
-import omero.cmd.SessionPrx;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -84,8 +81,6 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		}
 		return "rw----"; //private group;
 	}
-
-	@SuppressWarnings("unchecked")
 
 	void setGroupUp() throws Exception {
 		//super.setUp();
@@ -153,12 +148,11 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 			//Add the last 4 users to one group alone
 			else
 			{
-				default_group =  groups1.get(cntr);				
+				default_group =  groups1.get(cntr);
 				target_groups.add(groups2.get(cntr));
 				cntr = cntr+1;
 			}
-			factory.getAdminService().createExperimenterWithPassword(experimenter, omeroPassword, default_group, target_groups);	
-
+			factory.getAdminService().createExperimenterWithPassword(experimenter, omeroPassword, default_group, target_groups);
 		}
 		client.closeSession();
 	}
@@ -171,10 +165,10 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		for ( int i=0; i<users.length ; i++)
 		{
 
-			omero.client client = new omero.client("localhost");
+			omero.client client = new omero.client();
 			client.closeSession();
 
-			ServiceFactoryPrx session = client.createSession(users[i], "ome");	
+			ServiceFactoryPrx session = client.createSession(users[i], "ome");
 			client.enableKeepAlive(60);
 
 			Experimenter user1 = session.getAdminService().lookupExperimenter(users[i]);
@@ -207,7 +201,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		List<Long[]> idlist = new ArrayList<Long[]>();
 		for (int j=0 ; j<users.length ; j++)
 		{
-			omero.client client = new omero.client("localhost");
+			omero.client client = new omero.client();
 			client.closeSession();
 
 			ServiceFactoryPrx session = client.createSession(users[j], password);
@@ -255,7 +249,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		List<Long[]> idlist = getAllImages();
 		for (int j=0 ; j<users.length ; j++)
 		{
-			omero.client client = new omero.client("localhost");
+			omero.client client = new omero.client();
 			ServiceFactoryPrx session = client.createSession(users[j], password);
 			String comment = users[j] + "_comment";
 			String tag = users[j] + "_tag";
@@ -273,7 +267,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 				PermissionData perms = new PermissionData(group.getDetails().getPermissions());
 				String permsAsString = getPermissions(perms.getPermissionsLevel());
 				final String[] subgroups= {perm_table[0], perm_table[3]};
-				final List perm_table1 = Arrays.asList(subgroups);
+				final List<?> perm_table1 = Arrays.asList(subgroups);
 
 				iUpdate = session.getUpdateService();
 				mmFactory = new ModelMockFactory(session.getPixelsService());
@@ -327,25 +321,6 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 						link.setChild(new FileAnnotationI(f.getId().getValue(), false));
 						link.setParent(new ImageI(imageid, false));
 						links.add(link);
-						System.out.print(session.getAdminService().getEventContext().groupId);
-						System.out.printf("%n");
-						System.out.print(permsAsString);
-						System.out.printf("%n");
-						System.out.print(session.getAdminService().getEventContext().groupId);
-						System.out.printf("%n");
-
-						System.out.print(imageid.longValue());
-						System.out.printf("%n");
-						System.out.print(ownerid);
-						System.out.printf("%n");
-						System.out.print(expid.getValue());
-						System.out.printf("%n");
-						System.out.print(groupid);
-						System.out.printf("%n");
-						System.out.print(group.getId().getValue());
-						System.out.printf("%n");
-						System.out.print(perm_table1.contains(permsAsString));
-						System.out.printf("%n");
 						iUpdate.saveAndReturnArray(links);	
 					}
 
@@ -356,268 +331,124 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		}
 	}
 
-//	@Test
-	void moveAllImages() throws Exception {
-
-		//		setGroupUp();
-		//		testImagesSetup();
-		//		annotateAllImages();
-		
-		for (int j=0 ; j<users.length ; j++)
-		{
-			omero.client client = new omero.client("localhost");
-			ServiceFactoryPrx session = client.createSession(users[j], password);
-
-			Experimenter user1 = session.getAdminService().lookupExperimenter(users[j]);
-			List<Long> gids = session.getAdminService().getMemberOfGroupIds(user1);
-			for ( int k=0 ; k< gids.size() ; k++)
-			{
-
-				for ( int l=0 ; l<gids.size() ; l++) {
-
-					ExperimenterGroupI group = new ExperimenterGroupI(gids.get(k), false);
-					session.setSecurityContext(group);
-
-					ExperimenterGroup group2 = session.getAdminService().getGroup(gids.get(k));
-					PermissionData perms = new PermissionData(group2.getDetails().getPermissions());
-					String permsAsString = getPermissions(perms.getPermissionsLevel());
-
-					Long userid = session.getAdminService().getEventContext().userId;
-					Long groupId = session.getAdminService().getEventContext().groupId;
-
-					Long targetgroup = gids.get(l);
-					Chgrp chgrp = new Chgrp();
-
-					ExperimenterGroup group1 =  session.getAdminService().getGroup(targetgroup);
-					PermissionData perms1 = new PermissionData(group1.getDetails().getPermissions());
-					String permsAsString1 = getPermissions(perms1.getPermissionsLevel());
-
-					ParametersI params = new omero.sys.ParametersI();
-					params.exp(omero.rtypes.rlong(userid));
-
-					IContainerPrx proxy = session.getContainerService();
-					List<Image> imageList1 = proxy.getUserImages(params);
-					if (imageList1.size()==0){
-
-						iUpdate = session.getUpdateService();
-						mmFactory = new ModelMockFactory(session.getPixelsService());
-						Image img = (Image) iUpdate.saveAndReturnObject(mmFactory
-								.simpleImage());
-						assertNotNull(img);
-						imageList1 =  proxy.getUserImages(params);
-					}					
-
-					Image img = imageList1.get(0);
-					long groupid = img.getDetails().getGroup().getId().getValue();
-					long imageid = img.getId().getValue();
-					long ownerid = img.getDetails().getOwner().getId().getValue();
-
-					//Fetch fileset prior to move
-					//					System.out.print(imageid);
-					//					System.out.printf("%n");
-					//					System.out.print(groupid);
-					//					System.out.printf("%n");
-					//					System.out.print(groupId);
-					//					System.out.printf("%n");
-					//					System.out.print(userid);
-					//					System.out.printf("%n");
-					//					System.out.print(ownerid);
-					//					System.out.printf("%n");
-					//					System.out.print(targetgroup);
-					//					System.out.printf("%n");
-
-					List<Request> list = new ArrayList<Request>();
-					chgrp.id = imageid;
-					chgrp.type = "/Image";
-					chgrp.grp = targetgroup;
-
-					list.add(chgrp);
-					DoAll all = new DoAll();
-					all.requests = list;
-					HandlePrx handle1 = session.submit(all);
-					long timeout_move = scalingFactor *  1 * 100;
-
-					CmdCallbackI cb = new CmdCallbackI(client, handle1);
-					cb.loop(10 * all.requests.size(), timeout_move);
-					Response response = cb.getResponse();
-
-					if (response == null) {
-						System.out.print("Failure");
-						System.out.printf("%n");
-					}
-					if (response instanceof DoAllRsp) {
-
-						List<Response> responses = ((DoAllRsp) response).responses;
-						if (responses.size() == 1) {
-							Response responses1 = responses.get(0);	
-							//							System.out.print(responses1.toString());
-							//Switch context to target group to extract the annotation links per owner
-							ExperimenterGroupI group12 = new ExperimenterGroupI(targetgroup, false);
-							session.setSecurityContext(group12);
-							iQuery = session.getQueryService();
-							Image i = (Image) iQuery.get("Image", imageid);
-
-							Map<Long, Long> annotationslink = img.getAnnotationLinksCountPerOwner();
-							Map<Long, Long> annotationslink1 = i.getAnnotationLinksCountPerOwner();
-
-							if(annotationslink.get(userid)==annotationslink1.get(userid)){
-								//								System.out.print("success: User : " + userid + " " +ownerid + "tried moving image " + imageid + " from " + groupid + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
-								//								System.out.printf("%n");
-							} else {
-								System.out.print("Failure with annotations: User : " + userid + " " +ownerid + "tried moving image " + imageid + " from " + groupid + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
-								System.out.printf("%n");
-							}
-
-
-						}
-
-					} else if (response instanceof ERR) {
-						if (img.sizeOfAnnotationLinks() > 0) {
-							List<ImageAnnotationLink> links = img.copyAnnotationLinks();
-							Iterator<ImageAnnotationLink> kk = links.iterator();
-							while (kk.hasNext()) {
-								ImageAnnotationLink link = kk.next();
-								System.err.println(link.getDetails().getOwner().getId().getValue());
-
-							}
-						}
-
-						ERR error = (ERR) response;
-						System.err.println(error);
-						System.out.printf("%n");
-						System.out.print("Failure : User : " + userid + " " +ownerid + "tried moving image " + imageid + " from " + groupid + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
-						System.out.printf("%n");
-						//						
-					}		
-				}
-
-			}
-			client.closeSession();
-		}
-
-	}
 
 	@DataProvider(name = "createData")
 	public Object[][] createData() {
-	    List<TestParam> map = new ArrayList<TestParam>();
-	    Object[][] values = null;
-	    try {
-	        
-	       
-	        for (int j=0 ; j< users.length ; j++) //users.length
-	        {
-	            omero.client client = new omero.client("localhost");
-	            ServiceFactoryPrx session = client.createSession(users[j], password);
+		List<TestParam> map = new ArrayList<TestParam>();
+		Object[][] values = null;
+		try {
 
-	            Experimenter user1 = session.getAdminService().lookupExperimenter(users[j]);
-	            List<Long> gids = session.getAdminService().getMemberOfGroupIds(user1);
-	            for ( int k=0 ; k<gids.size() ; k++) //gids.size()
-	            {
 
-	                for ( int l=0 ; l < gids.size() ; l++) { //gids.size()
+			for (int j=0 ; j< 1 ; j++) //users.length
+			{
+				omero.client client = new omero.client("localhost");
+				ServiceFactoryPrx session = client.createSession(users[j], password);
 
-	                    ExperimenterGroupI group = new ExperimenterGroupI(gids.get(k), false);
-	                    session.setSecurityContext(group);
+				Experimenter user1 = session.getAdminService().lookupExperimenter(users[j]);
+				List<Long> gids = session.getAdminService().getMemberOfGroupIds(user1);
+				for ( int k=0 ; k<gids.size() ; k++) //gids.size()
+				{
 
-	                    ExperimenterGroup group2 = session.getAdminService().getGroup(gids.get(k));
-	                    PermissionData perms = new PermissionData(group2.getDetails().getPermissions());
-	                    String permsAsString = getPermissions(perms.getPermissionsLevel());
+					for ( int l=0 ; l < gids.size() ; l++) { //gids.size()
 
-	                    Long userid = session.getAdminService().getEventContext().userId;
-	                    Long groupId = session.getAdminService().getEventContext().groupId;
+						ExperimenterGroupI group = new ExperimenterGroupI(gids.get(k), false);
+						session.setSecurityContext(group);
+						Long userid = session.getAdminService().getEventContext().userId;
 
-	                    Long targetgroup = gids.get(l);
-	                    Chgrp chgrp = new Chgrp();
+						Long targetgroup = gids.get(l);
+						Chgrp chgrp = new Chgrp();
 
-	                    ExperimenterGroup group1 =  session.getAdminService().getGroup(targetgroup);
-	                    PermissionData perms1 = new PermissionData(group1.getDetails().getPermissions());
-	                    String permsAsString1 = getPermissions(perms1.getPermissionsLevel());
+						ParametersI params = new omero.sys.ParametersI();
+						params.exp(omero.rtypes.rlong(userid));
 
-	                    ParametersI params = new omero.sys.ParametersI();
-	                    params.exp(omero.rtypes.rlong(userid));
+						IContainerPrx proxy = session.getContainerService();
+						List<Image> imageList1 = proxy.getUserImages(params);
+						if (imageList1.size()==0){
 
-	                    IContainerPrx proxy = session.getContainerService();
-	                    List<Image> imageList1 = proxy.getUserImages(params);
-	                    if (imageList1.size()==0){
+							iUpdate = session.getUpdateService();
+							mmFactory = new ModelMockFactory(session.getPixelsService());
+							Image img = (Image) iUpdate.saveAndReturnObject(mmFactory
+									.simpleImage());
+							assertNotNull(img);
+							imageList1 =  proxy.getUserImages(params);
+						}                   
 
-	                        iUpdate = session.getUpdateService();
-	                        mmFactory = new ModelMockFactory(session.getPixelsService());
-	                        Image img = (Image) iUpdate.saveAndReturnObject(mmFactory
-	                                .simpleImage());
-	                        assertNotNull(img);
-	                        imageList1 =  proxy.getUserImages(params);
-	                    }                   
+						Image img = imageList1.get(0);
+						long imageid = img.getId().getValue();
 
-	                    Image img = imageList1.get(0);
-	                    long groupid = img.getDetails().getGroup().getId().getValue();
-	                    long imageid = img.getId().getValue();
-	                    long ownerid = img.getDetails().getOwner().getId().getValue();
-	                    
-	                    chgrp.id = imageid;
-	                    chgrp.type = "/Image";
-	                    chgrp.grp = targetgroup;
-	                    map.add(new TestParam(chgrp, users[j], password, gids.get(k)));
-	                }
+						chgrp.id = imageid;
+						chgrp.type = "/Image";
+						chgrp.grp = targetgroup;
+						map.add(new TestParam(chgrp, users[j], password, gids.get(k)));
+					}
 
-	            }
-	            int index = 0;
-	            Iterator<TestParam> k = map.iterator();
-	            values = new Object[map.size()][1];
-	            while (k.hasNext()) {
-                    values[index][0] = k.next();
-                    index++;
-                }
-	        }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-		
+				}
+				int index = 0;
+				Iterator<TestParam> k = map.iterator();
+				values = new Object[map.size()][1];
+				while (k.hasNext()) {
+					values[index][0] = k.next();
+					index++;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return values;
 
 	}
 
 	@Test(dataProvider="createData")
 	public void test(TestParam param) throws Exception{
-		    String username = param.getUser();
-	        String passwd = param.getPass();
-	        Long sourcegroup = param.getsrcID();
-	        
-	        //create session and switch context to source group
-	        omero.client client = new omero.client("localhost");
-	        ServiceFactoryPrx session1 = client.createSession(username, passwd);
-	        
-	        ExperimenterGroupI group = new ExperimenterGroupI(sourcegroup, false);
-	        session1.setSecurityContext(group);
-	        DoAll all = new DoAll();
-	        List<Request> list1 = new ArrayList<Request>();
-	        list1.add(param.getChgrp());
-	        all.requests = list1;
-	        HandlePrx handle1 = session1.submit(all);
-	        
-	        long timeout_move = scalingFactor *  1 * 100;
+		String username = param.getUser();
+		String passwd = param.getPass();
+		Long sourcegroup = param.getsrcID();
 
-	        CmdCallbackI cb = new CmdCallbackI(client, handle1);
-	        cb.loop(10 * all.requests.size(), timeout_move);
-	        Response response  = cb.getResponse();
-	        if (response == null) {
-                System.out.print("Failure");
-                System.out.printf("%n");
-            }
-            if (response instanceof DoAllRsp) {
+		//create session and switch context to source group
+		omero.client client = new omero.client("localhost");
+		ServiceFactoryPrx session1 = client.createSession(username, passwd);
 
-                List<Response> responses = ((DoAllRsp) response).responses;
-                if (responses.size() == 1) {
-                    Response r = responses.get(0); 
-                    //                          System.out.print(responses1.toString());
-                    //Switch context to target group to extract the annotation links per owner
-                    //Assert.
-                    //Assert.fail("Did move");
-                    Assert.assertTrue(r instanceof OK, "move OK");
-                }
-            } else if (response instanceof ERR) {
-                Assert.fail("Did not move");
-                //                      
-            }
+		ExperimenterGroupI group = new ExperimenterGroupI(sourcegroup, false);
+		session1.setSecurityContext(group);
+		DoAll all = new DoAll();
+		List<Request> list1 = new ArrayList<Request>();
+		list1.add(param.getChgrp());
+		all.requests = list1;
+		HandlePrx handle1 = session1.submit(all);
+
+		long timeout_move = scalingFactor *  1 * 100;
+
+		CmdCallbackI cb = new CmdCallbackI(client, handle1);
+		cb.loop(10 * all.requests.size(), timeout_move);
+		Response response  = cb.getResponse();
+		if (response == null) {
+			System.out.print("Failure");
+			System.out.printf("%n");
+		}
+		if (response instanceof DoAllRsp) {
+
+			List<Response> responses = ((DoAllRsp) response).responses;
+			if (responses.size() == 1) {
+				Response r = responses.get(0); 
+				Assert.assertTrue(r instanceof OK, "move OK");
+			}
+		} else if (response instanceof ERR) {
+			long targetgroup = param.getChgrp().grp;
+			long imageid = param.getChgrp().id;
+			Long userid = session1.getAdminService().getEventContext().userId;
+
+			ExperimenterGroup group2 =  session1.getAdminService().getGroup(sourcegroup);
+			PermissionData perms = new PermissionData(group2.getDetails().getPermissions());
+			String permsAsString = getPermissions(perms.getPermissionsLevel());
+
+			ExperimenterGroup group1 =  session1.getAdminService().getGroup(targetgroup);
+			PermissionData perms1 = new PermissionData(group1.getDetails().getPermissions());
+			String permsAsString1 = getPermissions(perms1.getPermissionsLevel());
+
+			Assert.fail("Failure : User : " +userid + "tried moving image " + imageid + " from " + sourcegroup + "(" + permsAsString + ")" + " to " + targetgroup + "(" + permsAsString1 + ")");
+			//                      
+		}
 	}
 
 
@@ -640,25 +471,16 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 		return fileset;
 	}
 
-//	public static void main(String[] args)
-//	{
-//		PermissionsTest_Matlab test = new PermissionsTest_Matlab();
-//		try {
-//			test.moveAllImages();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//
-//	}
-	
+
+
 	class TestParam {
-		
+
 		private Chgrp chgrp;
-		
+
 		private String user;
 		private String password;
 		private Long srcID;
-		
+
 		TestParam(Chgrp chgrp, String user, String password, Long srcID)
 		{
 			this.chgrp = chgrp;
@@ -666,7 +488,7 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 			this.password = password;
 			this.srcID = srcID;
 		}
-		
+
 		Chgrp getChgrp() { return chgrp; }
 		String getUser() { return user; }
 		String getPass() { return password; }
