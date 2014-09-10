@@ -41,6 +41,7 @@ import omero.cmd.CmdCallbackI;
 import omero.cmd.DoAllRsp;
 import omero.cmd.ERR;
 import omero.cmd.HandlePrx;
+import omero.cmd.OK;
 import omero.cmd.Request;
 import omero.cmd.Response;
 import omero.cmd.SessionPrx;
@@ -498,9 +499,10 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 
 	@DataProvider(name = "createData")
 	public Object[][] createData() {
-	    Map<Integer, TestParam> map = new HashMap<Integer, TestParam>();
+	    List<TestParam> map = new ArrayList<TestParam>();
+	    Object[][] values = null;
 	    try {
-	        int index = 0;
+	        
 	       
 	        for (int j=0 ; j< users.length ; j++) //users.length
 	        {
@@ -554,28 +556,28 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 	                    chgrp.id = imageid;
 	                    chgrp.type = "/Image";
 	                    chgrp.grp = targetgroup;
-	                    map.put(index, new TestParam(chgrp, users[j], password, gids.get(k)));
-	                    index++;
+	                    map.add(new TestParam(chgrp, users[j], password, gids.get(k)));
 	                }
 
 	            }
-
+	            int index = 0;
+	            Iterator<TestParam> k = map.iterator();
+	            values = new Object[map.size()][1];
+	            while (k.hasNext()) {
+                    values[index][0] = k.next();
+                    index++;
+                }
 	        }
         } catch (Exception e) {
             e.printStackTrace();
         }
 		
-		return new Object[][] {{ map } };
+		return values;
 
 	}
 
 	@Test(dataProvider="createData")
-	public void test(Map<Integer, TestParam> map) throws Exception{
-
-		
-	    TestParam param;
-		for (Map.Entry<Integer, TestParam> entry : map.entrySet()) {
-		    param = entry.getValue();
+	public void test(TestParam param) throws Exception{
 		    String username = param.getUser();
 	        String passwd = param.getPass();
 	        Long sourcegroup = param.getsrcID();
@@ -605,18 +607,17 @@ public class PermissionsTest_Matlab extends AbstractServerTest{
 
                 List<Response> responses = ((DoAllRsp) response).responses;
                 if (responses.size() == 1) {
-                    Response responses1 = responses.get(0); 
+                    Response r = responses.get(0); 
                     //                          System.out.print(responses1.toString());
                     //Switch context to target group to extract the annotation links per owner
                     //Assert.
                     //Assert.fail("Did move");
+                    Assert.assertTrue(r instanceof OK, "move OK");
                 }
-
             } else if (response instanceof ERR) {
                 Assert.fail("Did not move");
                 //                      
-            }       
-	    }
+            }
 	}
 
 
