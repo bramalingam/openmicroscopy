@@ -33,6 +33,7 @@ import java.util.UUID;
 import omero.RString;
 import omero.api.IAdminPrx;
 import omero.api.IContainerPrx;
+import omero.api.IRenderingSettingsPrx;
 import omero.api.ServiceFactoryPrx;
 import omero.cmd.Chgrp;
 import omero.cmd.CmdCallbackI;
@@ -57,6 +58,8 @@ import omero.model.ImageI;
 import omero.model.OriginalFile;
 import omero.model.Permissions;
 import omero.model.PermissionsI;
+import omero.model.Pixels;
+import omero.model.RenderingDef;
 import omero.model.TagAnnotation;
 import omero.model.TagAnnotationI;
 import omero.model.TermAnnotation;
@@ -88,7 +91,7 @@ public class PermissionsTestAll extends AbstractServerTest {
     private final String uuid = UUID.randomUUID().toString();
 
     private final String[] testGroupTypes = { "rwra--", "rw----", "rwr---",
-            "rwrw--" };
+    "rwrw--" };
 
     private final List<String> subsetOfTestGroups = Arrays.asList(
             testGroupTypes[0], testGroupTypes[3]);
@@ -117,7 +120,7 @@ public class PermissionsTestAll extends AbstractServerTest {
         super.setUp();
         setupGroups();
         setupTestImages();
-        annotateAllImages();
+        annotateAndRenderAllImages();
     }
 
     /**
@@ -239,8 +242,9 @@ public class PermissionsTestAll extends AbstractServerTest {
                     // Create new Image Objects(with pixels) and attach it to
                     // the session
                     for (int k = 0; k <= groupIds.size(); k++) {
+                        Image image = createBinaryImage();
                         Image img = (Image) iUpdate
-                                .saveAndReturnObject(mmFactory.simpleImage());
+                                .saveAndReturnObject(image);
                         assertNotNull(img);
                     }
                 }
@@ -254,7 +258,7 @@ public class PermissionsTestAll extends AbstractServerTest {
      * Annotates all the images created.
      * @throws Exception Thrown if an error occurred.
      */
-    void annotateAllImages() throws Exception {
+    void annotateAndRenderAllImages() throws Exception {
         for (int i = 0; i < testUserNames.length; i++) {
             omero.client client = new omero.client();
             ServiceFactoryPrx session = client
@@ -276,6 +280,7 @@ public class PermissionsTestAll extends AbstractServerTest {
                             .getValue(), false));
                     iUpdate = session.getUpdateService();
                     mmFactory = new ModelMockFactory(session.getPixelsService());
+
 
                     List<Long> annotationIds = new ArrayList<Long>();
 
@@ -331,6 +336,17 @@ public class PermissionsTestAll extends AbstractServerTest {
                             link.setParent(new ImageI(imageId, false));
                             links.add(link);
                             iUpdate.saveAndReturnArray(links);
+
+                            //Render images
+                            IRenderingSettingsPrx prx = factory.getRenderingSettingsService();
+                            Pixels pixels = img.getPrimaryPixels();
+                            long id = pixels.getId().getValue();
+                            RenderingDef def = session.getPixelsService().retrieveRndSettings(id);
+
+                            def = (RenderingDef) iUpdate.saveAndReturnObject(def);
+                            List<Long> ids = new ArrayList<Long>();
+                            ids.add(img.getId().getValue());
+                            prx.applySettingsToSet(id, Image.class.getName(), ids);
                         }
 
                     }
