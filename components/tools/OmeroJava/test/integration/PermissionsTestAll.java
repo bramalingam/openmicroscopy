@@ -77,7 +77,6 @@ import pojos.GroupData;
 import pojos.PermissionData;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 /**
  * 
@@ -339,8 +338,10 @@ public class PermissionsTestAll extends AbstractServerTest {
 
                             //Render images
                             IRenderingSettingsPrx prx = factory.getRenderingSettingsService();
-                            Pixels pixels = img.getPrimaryPixels();
+                            Image image2 = createBinaryImage();
+                            Pixels pixels = image2.getPrimaryPixels();
                             long id = pixels.getId().getValue();
+
                             RenderingDef def = session.getPixelsService().retrieveRndSettings(id);
 
                             def = (RenderingDef) iUpdate.saveAndReturnObject(def);
