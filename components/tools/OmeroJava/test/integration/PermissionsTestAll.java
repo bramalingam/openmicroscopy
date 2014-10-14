@@ -241,9 +241,11 @@ public class PermissionsTestAll extends AbstractServerTest {
                     // Create new Image Objects(with pixels) and attach it to
                     // the session
                     for (int k = 0; k <= groupIds.size(); k++) {
-                        Image image = createBinaryImage();
+                        Image image = mmFactory.createImage();
+                        image = (Image) iUpdate.saveAndReturnObject(image);
+                        Image image1 = createBinaryImage(image);
                         Image img = (Image) iUpdate
-                                .saveAndReturnObject(image);
+                                .saveAndReturnObject(image1);
                         assertNotNull(img);
                     }
                 }
@@ -338,7 +340,10 @@ public class PermissionsTestAll extends AbstractServerTest {
 
                             //Render images
                             IRenderingSettingsPrx prx = factory.getRenderingSettingsService();
-                            Image image2 = createBinaryImage();
+                            Image image = mmFactory.createImage();
+                            image = (Image) iUpdate.saveAndReturnObject(image);
+                            Image image2 = createBinaryImage(image);
+                            
                             Pixels pixels = image2.getPrimaryPixels();
                             long id = pixels.getId().getValue();
 
